@@ -47,17 +47,17 @@ async def add_card(message):
         all_boards = trello_client.list_boards()
         status, all_lists = check_inside_boards(all_boards)
         if status == 0 and all_lists:
-            list_to_complete = await find_list(all_lists, list_name, message) 
+            list_to_complete = await find_list(all_lists, list_name, message)
             if (list_to_complete):
                 if (len(list_to_complete) > 0):
-                    list_to_complete[0].add_card(name=name_of_card[0])            
+                    list_to_complete[0].add_card(name=name_of_card[0])
     elif len(exploded_msg) == 1:
         await message.channel.send("`/add_card [LIST] [CARD]`")
     elif len(exploded_msg) == 2:
         await message.channel.send("Ayo, you forgot to tell what to add in this list\nIf you forgot how to use, just type `/add_card`")
 
 def check_if_already_exists(board_id, name_of_list):
-    all_lists = trello_client.get_board(board_id).all_lists()    
+    all_lists = trello_client.get_board(board_id).all_lists()
     for liste_to_find in all_lists:
         if liste_to_find.name == name_of_list:
             return 1, liste_to_find
@@ -83,7 +83,7 @@ async def get_list(message):
     msg = ">>> "
     exploded_msg = (message.content).split(" ")
     if (len(exploded_msg) == 1):
-        BOARD_ID = getBoard() 
+        BOARD_ID = getBoard()
         all_lists = trello_client.get_board(BOARD_ID).all_lists()
         for List in all_lists:
             msg += "{}\n".format(List.name)
@@ -92,19 +92,26 @@ async def get_list(message):
     else:
         await message.channel.send("Man, this command has no parameter, just run it like that")
 
-async def get_cards(message):
+async def list_cards(message):
     msg = ">>> "
     exploded_msg = (message.content).split(" ")
     if (len(exploded_msg) == 1):
         # error, the command should have 1 parameter
+        print("You forgot a parameter dummies")
         pass
     elif (len(exploded_msg) == 2):
         # print all the cards from this list
+        msg = ">>> "
         BOARD_ID = getBoard()
         list_to_print = exploded_msg[1]
-        if check_if_already_exists(BOARD_ID, liste_to_print) == 1:
-            # exist
-            print("exist")            
+        error_code, list_to_list = check_if_already_exists(BOARD_ID, list_to_print)
+        if error_code== 1:
+            all_cards_in_this_list = list_to_list.list_cards()
+            for card in all_cards_in_this_list:
+                card_name = card.name
+                card_description = (card.description).replace("\n", "") if len(card.description) > 0 else "No description"
+                msg += "{}: *{}* \n".format(card_name, card_description)
+            await message.channel.send(msg)
         else:
             print("don't exists")
     else:
@@ -118,12 +125,10 @@ async def display_help(message):
 @client.event
 async def on_ready():
     print(f'We have logged in as {client.user}')
-    
 @client.event
 async def on_message(message):
     if message.author == client.user:
         return
-    
     if message.content.startswith("/\\help"):
         await display_help(message)
     if message.content.startswith("/add_card"):
@@ -133,5 +138,5 @@ async def on_message(message):
     if message.content.startswith("/get_list"):
         await get_list(message)
     if message.content.startswith("/get_cards"):
-        await get_cards(message)
+        await list_cards(message)
 client.run(config["BOT_TOKEN"])
