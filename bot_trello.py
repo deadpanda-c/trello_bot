@@ -60,8 +60,8 @@ def check_if_already_exists(board_id, name_of_list):
     all_lists = trello_client.get_board(board_id).all_lists()    
     for liste_to_find in all_lists:
         if liste_to_find.name == name_of_list:
-            return 1
-    return 0
+            return 1, liste_to_find
+    return 0, None
 
 async def add_list(message):
     exploded_msg = (message.content).split(" ")
@@ -92,6 +92,29 @@ async def get_list(message):
     else:
         await message.channel.send("Man, this command has no parameter, just run it like that")
 
+async def get_cards(message):
+    msg = ">>> "
+    exploded_msg = (message.content).split(" ")
+    if (len(exploded_msg) == 1):
+        # error, the command should have 1 parameter
+        pass
+    elif (len(exploded_msg) == 2):
+        # print all the cards from this list
+        BOARD_ID = getBoard()
+        list_to_print = exploded_msg[1]
+        if check_if_already_exists(BOARD_ID, liste_to_print) == 1:
+            # exist
+            print("exist")            
+        else:
+            print("don't exists")
+    else:
+        print("There is too much parameter")
+        # too much parameter
+
+async def display_help(message):
+    await message.channel.send(">>> Welcome dear user !\nSoooo, here is my man ! Enjoy :) !\n\n`/add_card [LIST] [name of your card]`: allows you to add a card in a existing list in the board\n`/add_list [LIST]`: If a list doesn't exist, you can create it by running this command\n`/get_list`: allows you to get the list of list (i'm too funny dude)\n`/get_cards`: if you don't remember what you put on your trello (shame on you), you can just get it by tapping this command\n`/\\help`: Am I really supposed to describe what it does ??")
+
+
 @client.event
 async def on_ready():
     print(f'We have logged in as {client.user}')
@@ -100,11 +123,15 @@ async def on_ready():
 async def on_message(message):
     if message.author == client.user:
         return
-
+    
+    if message.content.startswith("/\\help"):
+        await display_help(message)
     if message.content.startswith("/add_card"):
         await add_card(message)
     if message.content.startswith("/add_list"):
         await add_list(message)
     if message.content.startswith("/get_list"):
         await get_list(message)
+    if message.content.startswith("/get_cards"):
+        await get_cards(message)
 client.run(config["BOT_TOKEN"])
