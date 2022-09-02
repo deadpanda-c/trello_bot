@@ -96,14 +96,12 @@ async def list_cards(message):
     msg = ">>> "
     exploded_msg = (message.content).split(" ")
     if (len(exploded_msg) == 1):
-        # error, the command should have 1 parameter
-        print("You forgot a parameter dummies")
-        pass
+        await message.channel.send("You forgot a parameter dummies (the list name ;) )")
     elif (len(exploded_msg) == 2):
         # print all the cards from this list
-        msg = ">>> "
         BOARD_ID = getBoard()
         list_to_print = exploded_msg[1]
+        msg = "Here you go with the cards in **{}**\n>>> ".format(list_to_print.replace("\n", ""))
         error_code, list_to_list = check_if_already_exists(BOARD_ID, list_to_print)
         if error_code== 1:
             all_cards_in_this_list = list_to_list.list_cards()
@@ -113,10 +111,9 @@ async def list_cards(message):
                 msg += "{}: *{}* \n".format(card_name, card_description)
             await message.channel.send(msg)
         else:
-            print("don't exists")
+            await message.channel.send("Man, your list doesn't exist :(")
     else:
-        print("There is too much parameter")
-        # too much parameter
+        await message.channel.send("There is too much parameter")
 
 async def display_help(message):
     await message.channel.send(">>> Welcome dear user !\nSoooo, here is my man ! Enjoy :) !\n\n`/add_card [LIST] [name of your card]`: allows you to add a card in a existing list in the board\n`/add_list [LIST]`: If a list doesn't exist, you can create it by running this command\n`/get_list`: allows you to get the list of list (i'm too funny dude)\n`/get_cards`: if you don't remember what you put on your trello (shame on you), you can just get it by tapping this command\n`/\\help`: Am I really supposed to describe what it does ??")
@@ -124,7 +121,18 @@ async def display_help(message):
 
 @client.event
 async def on_ready():
-    print(f'We have logged in as {client.user}')
+    channel = client.get_channel(int(config["CHANNEL_ID"]))
+    if not channel:
+        print("No channel found")
+    else:
+        await channel.send("""
+        >>> Hello everyone, I'm up !! :smile:\nI'm here to help y'all for this amazing project (lol) ! If you want to see my incredible power, just type `/\\help` !\nAnd now, Good Luck for this project, and Enjoy ! :)\n
+        
+        https://giphy.com/gifs/foxhomeent-napoleon-dynamite-20th-century-fox-icUEIrjnUuFCWDxFpU
+        """)
+        print(f'We have logged in as {client.user}')
+
+
 @client.event
 async def on_message(message):
     if message.author == client.user:
