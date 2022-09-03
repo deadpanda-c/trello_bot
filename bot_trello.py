@@ -147,4 +147,7 @@ async def on_message(message):
         await get_list(message)
     if message.content.startswith("/get_cards"):
         await list_cards(message)
+    if message.content.startswith("/add_list"):
+        # add list (/add_list [nameOfTheFuturList]
+        pass
 client.run(config["BOT_TOKEN"])
